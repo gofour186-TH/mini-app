@@ -1,5 +1,8 @@
 (function () {
   const tg = window.Telegram && window.Telegram.WebApp ? window.Telegram.WebApp : null;
+  const supabaseUrl = "https://yzwkyomcnpcdhsvltchc.supabase.co";
+  const supabaseKey = "sb_publishable_xGvyWWlMJnP47EGrrFe5Ww_b6CplC5u";
+  const supabase = window.supabase.createClient(supabaseUrl, supabaseKey);
 
   const countries = [
     { id: "thailand", label: "Таиланд" },
@@ -33,14 +36,39 @@
   const chatMessagesNode = document.getElementById("chatMessages");
   const chatInput = document.getElementById("chatInput");
   const sendChatBtn = document.getElementById("sendChatBtn");
+  const clientName = document.getElementById("clientName");
+  const clientHandle = document.getElementById("clientHandle");
+  const commentText = document.getElementById("commentText");
 
   let activeCountry = "thailand";
   let activeDirectionId = "th-1";
+  let currentUser = {
+    id: "guest-demo-user",
+    username: "guest",
+    fullName: "Гость"
+  };
 
   function formatNumber(value) {
     return new Intl.NumberFormat("ru-RU", {
       maximumFractionDigits: 2
     }).format(value);
+  }
+
+  function getTelegramUser() {
+    const user = tg && tg.initDataUnsafe ? tg.initDataUnsafe.user : null;
+    if (!user) {
+      return {
+        id: "guest-demo-user",
+        username: "guest",
+        fullName: clientName.value.trim() || "Гость"
+      };
+    }
+
+    return {
+      id: String(user.id),
+      username: user.username || "",
+      fullName: [user.first_name, user.last_name].filter(Boolean).join(" ") || "Клиент"
+    };
   }
 
   function openScreen(screenName) {
@@ -163,6 +191,35 @@
     }).join("");
   }
 
+  async function loadDeals() {
+    currentUser = getTelegramUser();
+
+    const { data, error } = await supabase
+      .from("deals")
+      .select("*")
+      .eq("telegram_id", currentUser.id)
+      .order("created_at", { ascending: false });
+
+    if (error) {
+      formStatus.textContent = "Не удалось загрузить сделки.";
+      renderDeals();
+      return;
+    }
+
+    deals.length = 0;
+    data.forEach(function (deal) {
+      deals.push({
+        id: deal.id.slice(0, 8).toUpperCase(),
+        route: deal.direction,
+        amount: deal.amount_from + " -> " + deal.amount_to,
+        status: deal.status || "Новая",
+        statusClass: deal.status === "Завершено" ? "success" : ""
+      });
+    });
+
+    renderDeals();
+  }
+
   function renderChat() {
     chatMessagesNode.innerHTML = chatMessages.map(function (message) {
       const bubbleClass = message.role === "manager" ? "bubble bubble-manager" : "bubble bubble-user";
@@ -210,12 +267,34 @@
 
     amountFrom.addEventListener("input", updateCreateForm);
 
-    document.getElementById("createDealBtn").addEventListener("click", function () {
+    document.getElementById("createDealBtn").addEventListener("click", async function () {
       const direction = selectedDirection();
+      const payload = {
+        created_at: new Date().toISOString(),
+        telegram_id: currentUser.id,
+        username: clientHandle.value.trim() || currentUser.username || "",
+        full_name: clientName.value.trim() || currentUser.fullName,
+        direction: direction.route,
+        amount_from: amountFrom.value + " " + direction.route.split(" -> ")[0],
+        amount_to: amountTo.value,
+        status: "Новая"
+      };
+
+      const { data, error } = await supabase
+        .from("deals")
+        .insert(payload)
+        .select()
+        .single();
+
+      if (error) {
+        formStatus.textContent = "Не удалось создать заявку. Проверь настройки Supabase.";
+        return;
+      }
+
       const newDeal = {
-        id: "FX-" + String(2015 + deals.length),
+        id: data.id.slice(0, 8).toUpperCase(),
         route: direction.route,
-        amount: amountFrom.value + " " + direction.route.split(" -> ")[0] + " -> " + amountTo.value,
+        amount: payload.amount_from + " -> " + payload.amount_to,
         status: "Новая",
         statusClass: ""
       };
@@ -239,7 +318,8 @@
           dealId: newDeal.id,
           route: direction.route,
           amountFrom: amountFrom.value,
-          amountTo: amountTo.value
+          amountTo: amountTo.value,
+          comment: commentText.value.trim()
         }));
       }
 
@@ -275,6 +355,9 @@
   }
 
   function init() {
+    currentUser = getTelegramUser();
+    clientName.value = currentUser.fullName;
+    clientHandle.value = currentUser.username ? "@" + currentUser.username : clientHandle.value;
     renderCountries();
     renderDirections();
     renderDirectionSelect();
@@ -283,6 +366,7 @@
     updateCreateForm();
     bindEvents();
     initTelegram();
+    loadDeals();
   }
 
   init();

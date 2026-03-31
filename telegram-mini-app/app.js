@@ -97,7 +97,7 @@
         '      <div class="direction-route">' + item.route + "</div>",
         '      <div class="direction-meta">Резерв: ' + item.reserve + " • " + item.eta + "</div>",
         "    </div>",
-        '    <div class="direction-rate">' + formatNumber(item.rate) + "</div>",
+        '    <div class="direction-rate">' + directionRateLabel(item) + "</div>",
         "  </div>",
         '  <button type="button" data-direction="' + item.id + '">Выбрать</button>',
         "</article>"
@@ -112,12 +112,22 @@
     }).join("");
   }
 
+  function directionRateLabel(direction) {
+    if (direction.route === "RUB -> THB") {
+      return "1 THB = 2.6 RUB";
+    }
+
+    return formatNumber(direction.rate);
+  }
+
   function updateCreateForm() {
     const direction = selectedDirection();
     const amount = Number(amountFrom.value) || 0;
     const result = amount * direction.rate;
 
-    summaryRate.textContent = "1 " + direction.route.split(" -> ")[0] + " = " + formatNumber(direction.rate) + " " + direction.route.split(" -> ")[1];
+    summaryRate.textContent = direction.route === "RUB -> THB"
+      ? "1 THB = 2.6 RUB"
+      : "1 " + direction.route.split(" -> ")[0] + " = " + formatNumber(direction.rate) + " " + direction.route.split(" -> ")[1];
     amountTo.value = formatNumber(result) + " " + direction.route.split(" -> ")[1];
   }
 

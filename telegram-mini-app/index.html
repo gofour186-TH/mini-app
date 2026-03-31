@@ -19,7 +19,187 @@
       </div>
       <button class="icon-btn" type="button" aria-label="Уведомления">
         <span></span>
+      </button><!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <title>FXBridge Mini App</title>
+  <meta name="theme-color" content="#f7f4ee">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Fraunces:wght@600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <div class="mobile-app">
+    <header class="topbar">
+      <div>
+        <p class="brand-kicker">FXBridge</p>
+        <h1 class="brand-title">Premium exchange inside Telegram</h1>
+      </div>
+      <button class="icon-btn" type="button" aria-label="Уведомления">
+        <span></span>
       </button>
+    </header>
+
+    <main class="screen-stack">
+      <section class="screen screen-active" data-screen="home">
+        <div class="hero-card">
+          <div class="hero-copy">
+            <p class="eyebrow">Ex24 inspired</p>
+            <h2>Обмен валют по миру, аккуратно и быстро</h2>
+            <p>Выберите страну, посмотрите направления и создайте заявку в пару касаний.</p>
+          </div>
+          <button class="primary-action" type="button" data-open-screen="create">Обменять</button>
+        </div>
+
+        <section class="section-block">
+          <div class="section-head">
+            <h3>Страны</h3>
+            <span class="section-note">Фильтр направлений</span>
+          </div>
+          <div id="countryFilters" class="chip-row"></div>
+        </section>
+
+        <section class="section-block">
+          <div class="section-head">
+            <h3>Популярные карточки</h3>
+            <span class="section-note">Моковые тарифы</span>
+          </div>
+          <div class="cards-grid">
+            <article class="stat-card soft-gold">
+              <span>Средний курс</span>
+              <strong>1 THB = 2.6 RUB</strong>
+              <small>Обновлено 2 мин назад</small>
+            </article>
+            <article class="stat-card soft-green">
+              <span>Активных заявок</span>
+              <strong>24</strong>
+              <small>В обработке менеджерами</small>
+            </article>
+          </div>
+        </section>
+
+        <section class="section-block">
+          <div class="section-head">
+            <h3>Направления обмена</h3>
+            <span id="countryNote" class="section-note">Таиланд</span>
+          </div>
+          <div id="directionsList" class="direction-list"></div>
+        </section>
+      </section>
+
+      <section class="screen" data-screen="create">
+        <div class="panel-card form-card">
+          <div class="section-head compact">
+            <h3>Создание заявки</h3>
+            <button class="link-btn" type="button" data-open-screen="home">Назад</button>
+          </div>
+
+          <label class="field">
+            <span>Направление</span>
+            <select id="directionSelect"></select>
+          </label>
+
+          <label class="field">
+            <span>Вы отдаёте</span>
+            <input id="amountFrom" type="number" min="0" step="100" value="50000" inputmode="decimal">
+          </label>
+
+          <label class="field">
+            <span>Получаете</span>
+            <input id="amountTo" type="text" value="19 230.77 THB" readonly>
+          </label>
+
+          <div class="inline-grid">
+            <label class="field">
+              <span>Имя</span>
+              <input id="clientName" type="text" value="Kirill">
+            </label>
+
+            <label class="field">
+              <span>Telegram</span>
+              <input id="clientHandle" type="text" value="@kirill">
+            </label>
+          </div>
+
+          <label class="field">
+            <span>Комментарий</span>
+            <textarea id="commentText" rows="3">Нужен быстрый обмен сегодня.</textarea>
+          </label>
+
+          <div class="summary-card">
+            <div>
+              <span>Курс</span>
+              <strong id="summaryRate">1 THB = 2.6 RUB</strong>
+            </div>
+            <div>
+              <span>Срок</span>
+              <strong>от 7 минут</strong>
+            </div>
+          </div>
+
+          <button id="createDealBtn" class="primary-action" type="button">Создать заявку</button>
+          <p id="formStatus" class="status-line" aria-live="polite"></p>
+        </div>
+      </section>
+
+      <section class="screen" data-screen="chat">
+        <div class="panel-card">
+          <div class="section-head compact">
+            <div>
+              <h3>Чат с менеджером</h3>
+              <span class="section-note">FXBridge concierge</span>
+            </div>
+            <span class="badge-live">online</span>
+          </div>
+
+          <div id="chatMessages" class="chat-thread"></div>
+
+          <div class="chat-compose">
+            <input id="chatInput" type="text" placeholder="Напишите сообщение менеджеру">
+            <button id="sendChatBtn" class="icon-send" type="button" aria-label="Отправить"></button>
+          </div>
+        </div>
+      </section>
+
+      <section class="screen" data-screen="deals">
+        <div class="panel-card">
+          <div class="section-head compact">
+            <h3>Мои сделки</h3>
+            <span class="section-note">История и статусы</span>
+          </div>
+          <div id="dealsList" class="deal-list"></div>
+        </div>
+      </section>
+    </main>
+
+    <nav class="bottom-nav" aria-label="Основное меню">
+      <button class="nav-item nav-item-active" type="button" data-open-screen="home">
+        <span class="nav-icon nav-home"></span>
+        <span>Главная</span>
+      </button>
+      <button class="nav-item" type="button" data-open-screen="create">
+        <span class="nav-icon nav-create"></span>
+        <span>Заявка</span>
+      </button>
+      <button class="nav-item" type="button" data-open-screen="chat">
+        <span class="nav-icon nav-chat"></span>
+        <span>Чат</span>
+      </button>
+      <button class="nav-item" type="button" data-open-screen="deals">
+        <span class="nav-icon nav-deals"></span>
+        <span>Сделки</span>
+      </button>
+    </nav>
+  </div>
+
+  <script src="https://telegram.org/js/telegram-web-app.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
+
     </header>
 
     <main class="screen-stack">

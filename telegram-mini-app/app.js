@@ -270,6 +270,7 @@
     document.getElementById("createDealBtn").addEventListener("click", async function () {
       const direction = selectedDirection();
       const payload = {
+        id: crypto.randomUUID(),
         created_at: new Date().toISOString(),
         telegram_id: currentUser.id,
         username: clientHandle.value.trim() || currentUser.username || "",
@@ -287,7 +288,7 @@
         .single();
 
       if (error) {
-        formStatus.textContent = "Не удалось создать заявку. Проверь настройки Supabase.";
+        formStatus.textContent = "Не удалось создать заявку: " + error.message;
         return;
       }
 

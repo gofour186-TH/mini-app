@@ -19,11 +19,7 @@
     { id: "cn-2", country: "china", route: "USDT -> CNY", rate: 7.24, eta: "6-12 мин", reserve: "920 000 CNY" }
   ];
 
-  const deals = [
-    { id: "FX-2014", route: "RUB -> THB", amount: "50 000 RUB -> 19 200 THB", status: "В работе", statusClass: "" },
-    { id: "FX-2013", route: "USDT -> AED", amount: "1 200 USDT -> 4 392 AED", status: "Завершено", statusClass: "success" },
-    { id: "FX-2012", route: "RUB -> CNY", amount: "95 000 RUB -> 7 505 CNY", status: "Завершено", statusClass: "success" }
-  ];
+  const deals = [];
 
   const chatMessages = [
     { role: "manager", text: "Здравствуйте. Я менеджер FXBridge, помогу оформить обмен и подтвержу детали.", time: "11:02" },
@@ -132,6 +128,16 @@
   }
 
   function renderDeals() {
+    if (!deals.length) {
+      dealsList.innerHTML = [
+        '<article class="deal-card">',
+        '  <div class="deal-route">Пока нет сделок</div>',
+        '  <div class="deal-meta">Новые заявки будут появляться здесь автоматически.</div>',
+        "</article>"
+      ].join("");
+      return;
+    }
+
     dealsList.innerHTML = deals.map(function (deal) {
       const statusClass = deal.statusClass ? "deal-status " + deal.statusClass : "deal-status";
       return [

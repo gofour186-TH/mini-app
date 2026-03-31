@@ -233,6 +233,36 @@
     chatMessagesNode.scrollTop = chatMessagesNode.scrollHeight;
   }
 
+  async function notifyTelegram(deal) {
+    try {
+      const response = await fetch("/.netlify/functions/send-deal", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+          dealId: deal.id,
+          fullName: clientName.value.trim() || currentUser.fullName,
+          username: clientHandle.value.trim() || currentUser.username || "",
+          telegramId: currentUser.id,
+          direction: deal.route,
+          amountFrom: deal.amount.split(" -> ")[0],
+          amountTo: deal.amount.split(" -> ")[1],
+          comment: commentText.value.trim()
+        })
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json().catch(function () {
+          return {};
+        });
+        formStatus.textContent = "Заявка сохранена, но не отправлена в Telegram: " + (errorData.error || response.status);
+      }
+    } catch (error) {
+      formStatus.textContent = "Заявка сохранена, но Telegram недоступен: " + error.message;
+    }
+  }
+
   function bindEvents() {
     document.addEventListener("click", function (event) {
       const screenTrigger = event.target.closest("[data-open-screen]");
@@ -324,6 +354,7 @@
         }));
       }
 
+      await notifyTelegram(newDeal);
       openScreen("chat");
     });
 

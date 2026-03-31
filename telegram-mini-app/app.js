@@ -3,20 +3,14 @@
 
   const countries = [
     { id: "thailand", label: "Таиланд" },
-    { id: "bali", label: "Бали" },
-    { id: "dubai", label: "Дубай" },
-    { id: "china", label: "Китай" }
+    { id: "russia", label: "Россия" }
   ];
 
   const directions = [
     { id: "th-1", country: "thailand", route: "RUB -> THB", rate: 0.384, eta: "7-15 мин", reserve: "1 250 000 THB" },
     { id: "th-2", country: "thailand", route: "USDT -> THB", rate: 33.82, eta: "5-12 мин", reserve: "820 000 THB" },
-    { id: "ba-1", country: "bali", route: "RUB -> IDR", rate: 175.5, eta: "10-20 мин", reserve: "410 000 000 IDR" },
-    { id: "ba-2", country: "bali", route: "USDT -> IDR", rate: 16122, eta: "7-15 мин", reserve: "590 000 000 IDR" },
-    { id: "du-1", country: "dubai", route: "RUB -> AED", rate: 0.041, eta: "12-18 мин", reserve: "320 000 AED" },
-    { id: "du-2", country: "dubai", route: "USDT -> AED", rate: 3.66, eta: "5-10 мин", reserve: "480 000 AED" },
-    { id: "cn-1", country: "china", route: "RUB -> CNY", rate: 0.079, eta: "10-25 мин", reserve: "650 000 CNY" },
-    { id: "cn-2", country: "china", route: "USDT -> CNY", rate: 7.24, eta: "6-12 мин", reserve: "920 000 CNY" }
+    { id: "ru-1", country: "russia", route: "RUB -> USDT", rate: 80.5, eta: "Наличный расчет в Москве", reserve: "от 4000 USDT" },
+    { id: "ru-2", country: "russia", route: "RUB -> USD", rate: 80.5, eta: "Наличный расчет в Москве", reserve: "от 4000 USD" }
   ];
 
   const deals = [];
@@ -113,17 +107,31 @@
       return "1 THB = 2.6 RUB";
     }
 
+    if (direction.id === "ru-1") {
+      return "80.5 RUB / USDT";
+    }
+
+    if (direction.id === "ru-2") {
+      return "80.5 RUB / USD";
+    }
+
     return formatNumber(direction.rate);
   }
 
   function updateCreateForm() {
     const direction = selectedDirection();
     const amount = Number(amountFrom.value) || 0;
-    const result = amount * direction.rate;
+    const result = direction.id === "ru-1" || direction.id === "ru-2"
+      ? amount / direction.rate
+      : amount * direction.rate;
 
     summaryRate.textContent = direction.route === "RUB -> THB"
       ? "1 THB = 2.6 RUB"
-      : "1 " + direction.route.split(" -> ")[0] + " = " + formatNumber(direction.rate) + " " + direction.route.split(" -> ")[1];
+      : direction.id === "ru-1"
+        ? "Покупка USDT за наличный расчет в Москве: 80.5 RUB"
+        : direction.id === "ru-2"
+          ? "Покупка USD за наличный расчет в Москве: 80.5 RUB"
+          : "1 " + direction.route.split(" -> ")[0] + " = " + formatNumber(direction.rate) + " " + direction.route.split(" -> ")[1];
     amountTo.value = formatNumber(result) + " " + direction.route.split(" -> ")[1];
   }
 
